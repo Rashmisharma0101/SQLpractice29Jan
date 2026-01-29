@@ -1,0 +1,13 @@
+customers(customer_id, customer_name, region)
+products(product_id, product_name, category)
+orders(order_id, customer_id, product_id, order_date, quantity, price)
+--------------------------------------------------------------------------------------------------------------
+Get customer name, product name, and total sales for each order.
+select orders.order_id, customers.customer_name, products.product_name, orders.quantity * orders.price as total_sales
+from customers join orders 
+on customers.customer_id = orders.customer_id
+join products on
+products.product_id = orders.product_id
+
+--------------------------------------------------------------------------------------------------------------
+

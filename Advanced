@@ -1,0 +1,55 @@
+orders(order_id, customer_id, product_id, order_date, quantity, price)
+Get latest order per customer
+select * from (select customer_id, order_id, order_date, row_number() over (partition by customer_id order by order_date desc) as
+latest_date
+from orders) t
+where latest_date  = 1
+----------------------------------------------------------------------------------------------
+Rank customers by total revenue
+with cte1 as (select customer_id, sum(quantity*price) as revenue from orders
+group by customer_id)
+select customer_id, revenue, dense_rank() over (order by revenue desc) as rnk from cte1
+----------------------------------------------------------------------------------------------
+
+with cte1 as (select order_date, quantity*price as sales from orders)
+select order_date, lag(order_date) over (order by order_date) as prev_date, 
+lag(sales) over (order by order_date) as prev_sales
+from cte1 
+
+----------------------------------------------------------------------------------------------
+select order_date, sum(sales) over (order by order_date) as running_total from orders
+
+----------------------------------------------------------------------------------------------
+First order per customer
+
+with cte1 as (select customer_id, order_id, row_number() over(partition by customer_id order by order_date asc) as 
+first_order from orders)
+select customer_id, order_id from cte1 where first_order  = 1
+
+----------------------------------------------------------------------------------------------
+Second highest sale
+with cte1 as (select order_id, price*quantity as sales, dense_rank() over(order by (price*quantity) desc) as 
+rnk from orders)
+select order_id, sales from cte1 where rnk  = 2
+
+----------------------------------------------------------------------------------------------
+Revenue growth day by day
+
+with cte1 as (select order_date, price*quantity as revenue, lag(price*quantity) over (order by order_date) as prev_revenue
+from orders)
+select order_date, revenue - prev_revenue as growth from cte1
+
+----------------------------------------------------------------------------------------------
+Top product per month
+
+with cte1 as (select month(order_date) as mn, product_id, sum(price*quantity) as revenue
+from orders group by month(order_date), product_id),
+cte2 as (select mn,product_id,  revenue, dense_rank() over(partition by mn order by revenue desc) as 
+rnk from cte1)
+select mn, product_id, revenue from cte2 where rnk  = 1
+
+
+
+
+
+

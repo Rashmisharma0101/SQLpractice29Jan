@@ -1,0 +1,62 @@
+STEP 1 — Revenue trend (core metric)
+SELECT
+  DATE(order_date) AS dt,
+  SUM(quantity * price) AS daily_revenue
+FROM orders
+GROUP BY DATE(order_date)
+ORDER BY dt;
+
+
+📌 Insight to write:
+
+Is revenue growing?
+
+Spikes or drops?
+
+STEP 2 — Top products (80/20 rule)
+SELECT
+  product_id,
+  SUM(quantity * price) AS revenue
+FROM orders
+GROUP BY product_id
+ORDER BY revenue DESC;
+
+
+📌 Insight:
+
+Which 20% products generate most revenue?
+
+STEP 3 — Customer concentration risk
+SELECT
+  customer_id,
+  SUM(quantity * price) AS revenue
+FROM orders
+GROUP BY customer_id
+ORDER BY revenue DESC;
+
+
+📌 Insight:
+
+Are we dependent on few customers?
+
+STEP 4 — Repeat customers
+SELECT customer_id, COUNT(*) AS orders
+FROM orders
+GROUP BY customer_id
+HAVING COUNT(*) > 1;
+
+
+📌 Insight:
+
+How many loyal customers do we have?
+
+STEP 5 — Low performing products
+SELECT product_id, SUM(quantity * price) AS revenue
+FROM orders
+GROUP BY product_id
+ORDER BY revenue ASC;
+
+
+📌 Insight:
+
+Which products should be improved or removed?

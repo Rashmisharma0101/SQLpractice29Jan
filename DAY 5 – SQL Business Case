@@ -60,3 +60,10 @@ ORDER BY revenue ASC;
 📌 Insight:
 
 Which products should be improved or removed?
+-------------------------------------------------------------------------
+repeat rate% of cstomers
+
+with cte1 as (select customer_id, count(order_id) as cnt from orders group by customer_id),
+cte2 as (select customer_id, case when cnt > 1 then 1 else 0 end as tag from cte1)
+select avg(tag) as repeat_percentage from cte2
+

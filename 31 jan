@@ -1,3 +1,4 @@
+conversion rate
 WITH funnel AS (
   SELECT
     event_name,
@@ -16,3 +17,22 @@ case
         from cte1),
 cte3 as (select event_name, users, lag(users) over (order by tag) as prev_count from cte 2)
 select event_name, users, users/prev_count as conversion_rate from cte3
+--------------------------------------------------------------------------------------------------
+
+Repeat purchase analysis
+
+with cte1 as (select user_id, count(order_id) as cnt from orders group by user_id),
+cte2 as (Select user_id, 
+case when cnt = 1 then 'one time buyer'
+when cnt between 2 and 3 then 'repeat customer'
+else 'loyal customer'
+end as customer_tag
+from cte1)
+select customer_tag, count(*) as num_customers from cte2 group by customer_tag
+
+
+
+
+
+
+

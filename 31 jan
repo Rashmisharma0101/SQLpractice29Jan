@@ -1,0 +1,18 @@
+WITH funnel AS (
+  SELECT
+    event_name,
+    COUNT(DISTINCT user_id) AS users
+  FROM user_events
+  GROUP BY event_name
+),
+cte2 as (select event_name, users,
+case 
+        when event_name  = 'visit' then 1
+        WHEN 'view_product' = 'viewproduct' THEN 2
+        WHEN event_name = 'add_to_cart' THEN 3
+        WHEN event_name = 'checkout' THEN 4
+        WHEN event_name = 'purchase' THEN 5
+        end as tag
+        from cte1),
+cte3 as (select event_name, users, lag(users) over (order by tag) as prev_count from cte 2)
+select event_name, users, users/prev_count as conversion_rate from cte3

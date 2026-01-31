@@ -29,6 +29,66 @@ else 'loyal customer'
 end as customer_tag
 from cte1)
 select customer_tag, count(*) as num_customers from cte2 group by customer_tag
+--------------------------------------------------------------------------------------------------
+
+1. select  month(order_date) as mn, sum(amount) as total_reevnue
+from orders
+group by month(ordeR_date)
+order by month(order_date)
+
+--------------------------------------------------------------------------------------------------
+2. select user_id, count(order_id) as cnt from
+users join orders
+on users.user_id = orders.user_id
+group by user_id
+having count(order_id) > 1
+--------------------------------------------------------------------------------------------------
+
+3. select user_id, min(order_date) as first_order_date from 
+users join orders
+on users.user_id = orders.user_id
+group by user_id
+
+--------------------------------------------------------------------------------------------------
+
+4. with cte1 as (select user_id, sum(amount) as revenue from orders
+group by user_id),
+cte2 as (select user_id, revenue, dense_rank() over (order by revenue desc) as rnk from cte1)
+select user_id, revenue from cte2 where rnk = 2
+
+--------------------------------------------------------------------------------------------------
+
+5.  New vs Returning Orders
+
+--------------------------------------------------------------------------------------------------
+
+Top Product per Month
+
+with cte1 as (select month(order_date) as mn, product_id, sum(amount)  as total from orders
+group by month(order_date) as mn, product_id
+order by mn, product_id),
+cte2 as (select mn, product_id, total, dense_rank() over (partition by mn order by total desc) as rnk from cte1)
+select mn, product_id, total from cte2 where rnk = 1
+
+--------------------------------------------------------------------------------------------------
+
+Funnel Conversion (Visit → Purchase)
+
+with cte1 as (select user_id, status, case
+when status = 'visit' then 1
+when status = 'clicked poduct' then 2
+when status = 'add to cart' then 3
+when status = 'made payment' then 4
+end as user_tag
+from orders
+),
+cte2 as (select status, count(*) as cnt from cte1 group by status),
+cte3 as (select status, cnt, lag(cnt) over (order by user_tag) as prev_count from cte2)
+select status , cnt, cnt / prev_cnt as conv_rate from cte3
+--------------------------------------------------------------------------------------------------
+
+
+
 
 
 
